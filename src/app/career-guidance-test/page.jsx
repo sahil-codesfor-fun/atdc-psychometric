@@ -71,8 +71,9 @@ export default function CareerGuidancePage() {
                 </Button>
               </Link>
               <Link href="/test?test=hgmi">
-                <Button size="lg" variant="outline" className="border-slate-400/40 text-white hover:bg-white/10 font-semibold px-6 h-12 rounded-full backdrop-blur-xs">
+                <Button size="lg" className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-8 h-12 rounded-full shadow-lg shadow-blue-600/30 transition-all hover:scale-105">
                   Multiple Intelligences (HGMI)
+                  <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               </Link>
             </div>
@@ -176,7 +177,7 @@ export default function CareerGuidancePage() {
 
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 pt-4">
               <div className="space-y-1">
-                <div className="text-3xl sm:text-4xl font-black text-white">450+</div>
+                <div className="text-3xl sm:text-4xl font-black text-white">4500</div>
                 <div className="text-xs text-blue-200 font-semibold">Training Modules</div>
               </div>
               <div className="space-y-1">
@@ -184,11 +185,11 @@ export default function CareerGuidancePage() {
                 <div className="text-xs text-blue-200 font-semibold">Candidates Assessed</div>
               </div>
               <div className="space-y-1">
-                <div className="text-3xl sm:text-4xl font-black text-white">500+</div>
+                <div className="text-3xl sm:text-4xl font-black text-white">1500+</div>
                 <div className="text-xs text-blue-200 font-semibold">Corporate Engagements</div>
               </div>
               <div className="space-y-1">
-                <div className="text-3xl sm:text-4xl font-black text-white">98.4%</div>
+                <div className="text-3xl sm:text-4xl font-black text-white">99.4%</div>
                 <div className="text-xs text-blue-200 font-semibold">Satisfaction Rate</div>
               </div>
             </div>
@@ -208,24 +209,6 @@ export default function CareerGuidancePage() {
           </div>
 
           <div className="space-y-3">
-            <div className="flex items-center gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-200">
-              <Mail className="w-5 h-5 text-blue-600 shrink-0" />
-              <div>
-                <div className="text-[11px] uppercase font-bold text-slate-500">Official Inquiries</div>
-                <a href="mailto:info@atdc.com" className="text-sm font-bold text-blue-700 hover:underline">
-                  info@atdc.com
-                </a>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-200">
-              <Mail className="w-5 h-5 text-blue-600 shrink-0" />
-              <div>
-                <div className="text-[11px] uppercase font-bold text-slate-500">Administration &amp; Support</div>
-                <a href="mailto:admin@atdc.com" className="text-sm font-bold text-blue-700 hover:underline">
-                  admin@atdc.com
-                </a>
-              </div>
-            </div>
           </div>
         </section>
       </div>

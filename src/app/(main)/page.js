@@ -292,9 +292,9 @@ export default function HomePage() {
       <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {[
           { label: "Validated Test Instruments", val: "15+", sub: "Standardized psychometric scales", icon: Target, color: "text-blue-600", bg: "bg-blue-50 border-blue-100" },
-          { label: "Candidates Evaluated", val: "250K+", sub: "Pan-India institutional reach", icon: Users, color: "text-indigo-600", bg: "bg-indigo-50 border-indigo-100" },
-          { label: "Psychometric Reliability", val: "98.4%", sub: "Validated scoring algorithms", icon: ShieldCheck, color: "text-emerald-600", bg: "bg-emerald-50 border-emerald-100" },
-          { label: "Corporate & School Partners", val: "500+", sub: "Enterprise & vocational training", icon: Award, color: "text-amber-600", bg: "bg-amber-50 border-amber-100" }
+          { label: "Candidates Evaluated", val: "4500K", sub: "Pan-India institutional reach", icon: Users, color: "text-indigo-600", bg: "bg-indigo-50 border-indigo-100" },
+          { label: "Psychometric Reliability", val: "99.4%", sub: "Validated scoring algorithms", icon: ShieldCheck, color: "text-emerald-600", bg: "bg-emerald-50 border-emerald-100" },
+          { label: "Corporate & School Partners", val: "1500+", sub: "Enterprise & vocational training", icon: Award, color: "text-amber-600", bg: "bg-amber-50 border-amber-100" }
         ].map((stat, idx) => {
           const Icon = stat.icon;
           return (
