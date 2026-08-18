@@ -1,45 +1,8 @@
 import { NextResponse } from 'next/server';
 import db from '@/lib/db';
+import { ensureSchema } from '@/lib/schema';
 import { generateAssessmentEmailHtml } from '@/lib/emailTemplate';
-import { queueEmail } from '@/lib/emailQueue';
-
-let schemaReady;
-
-async function ensureSchema() {
-  if (schemaReady) return schemaReady;
-  schemaReady = (async () => {
-    await db.execute(`
-      CREATE TABLE IF NOT EXISTS submission_responses (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        submission_id INT NOT NULL,
-        question_number INT NULL,
-        section_label VARCHAR(50) NULL,
-        question_text TEXT NULL,
-        selected_value TEXT NULL,
-        score_value DECIMAL(10,2) NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        INDEX idx_submission_id (submission_id)
-      )
-    `);
-
-    const [columns] = await db.query(`
-      SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
-      WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'submissions'
-    `);
-    const names = new Set(columns.map((c) => c.COLUMN_NAME));
-    if (!names.has('responses')) await db.execute(`ALTER TABLE submissions ADD COLUMN responses LONGTEXT NULL`);
-    if (!names.has('state')) await db.execute(`ALTER TABLE submissions ADD COLUMN state VARCHAR(255) NULL`);
-    return true;
-  })().catch((error) => {
-    schemaReady = null;
-    throw error;
-  });
-  return schemaReady;
-}
-
-function escapeHtml(value) {
-  return String(value ?? '').replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]));
-}
+import { sendEmail } from '@/lib/emailQueue';
 
 export async function POST(request) {
   try {
@@ -79,8 +42,6 @@ export async function POST(request) {
     const [insertResult] = await db.execute(sql, values);
     const submissionId = insertResult.insertId;
 
-    // Store every response separately as well as preserving the complete raw response payload.
-    // This makes later reporting/exporting possible without reparsing the assessment result.
     const responses = submission.responses;
     const rows = [];
     if (Array.isArray(responses)) {
@@ -113,8 +74,11 @@ export async function POST(request) {
         html: htmlTemplate,
       };
 
-      // Non-blocking queue: pushes to queue so API returns instantly without crashing under load
-      queueEmail(submission.email, mailOptions);
+      try {
+        await sendEmail(submission.email, mailOptions);
+      } catch (mailErr) {
+        console.error('❌ Failed to send assessment email:', mailErr?.message || mailErr);
+      }
     }
 
     return NextResponse.json({ success: true, submissionId }, { status: 201 });

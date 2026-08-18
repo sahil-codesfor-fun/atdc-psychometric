@@ -103,11 +103,12 @@ export default function AdminPanel() {
     setLoading(true);
     try {
       const response = await axios.get("/api/submissions");
-      setTestSubmissions(response.data || []);
+      setTestSubmissions(Array.isArray(response.data) ? response.data : []);
       setError("");
     } catch (err) {
       console.error("Error fetching test submissions:", err);
-      setError("Failed to fetch test submissions. Please check network connectivity.");
+      const errMsg = err.response?.data?.details || err.response?.data?.error || "Failed to fetch test submissions. Please check database configuration.";
+      setError(errMsg);
     } finally {
       setLoading(false);
     }

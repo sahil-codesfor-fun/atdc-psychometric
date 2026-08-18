@@ -1,27 +1,28 @@
 import nodemailer from 'nodemailer';
 
 let transporter = null;
-const queue = [];
-let isProcessing = false;
 
 function getTransporter() {
   const emailUser = process.env.EMAIL_USER?.trim();
   const emailPass = process.env.EMAIL_PASS?.trim();
 
   if (!emailUser || !emailPass) {
+    console.warn('⚠️ [Email Warning] EMAIL_USER or EMAIL_PASS is missing in environment variables.');
     return null;
   }
 
   if (!transporter) {
+    const host = process.env.EMAIL_HOST?.trim() || 'smtp.gmail.com';
+    const port = Number(process.env.EMAIL_PORT) || 465;
+    const secure = process.env.EMAIL_SECURE !== undefined ? process.env.EMAIL_SECURE === 'true' : port === 465;
+
     transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true,
-      pool: true,
-      maxConnections: 1, // Limit to 1 active connection to prevent SMTP rate limit crashes
-      maxMessages: 100,
-      rateLimit: 1, // Max 1 email per rateDelta
-      rateDelta: 2000, // 2 seconds delay between emails (30 emails/min max)
+      host,
+      port,
+      secure,
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 15000,
       auth: {
         user: emailUser,
         pass: emailPass,
@@ -31,54 +32,31 @@ function getTransporter() {
   return transporter;
 }
 
-async function processQueue() {
-  if (isProcessing || queue.length === 0) return;
-  isProcessing = true;
-
-  while (queue.length > 0) {
-    const item = queue[0];
-    const mailTransporter = getTransporter();
-
-    if (!mailTransporter) {
-      console.warn('⚠️ [Email Queue] Missing EMAIL_USER or EMAIL_PASS. Skipping email.');
-      queue.shift();
-      continue;
-    }
-
-    try {
-      console.log(`📧 [Email Queue] Processing email (${queue.length} in queue) for: ${item.to}`);
-      const mailInfo = await mailTransporter.sendMail(item.mailOptions);
-      console.log(`✅ [Email Queue] Email sent to ${item.to}. Message ID: ${mailInfo.messageId}`);
-      queue.shift();
-    } catch (error) {
-      item.retries = (item.retries || 0) + 1;
-      console.error(`❌ [Email Queue] Error sending to ${item.to} (Attempt ${item.retries}/3):`, error?.message || error);
-      
-      if (item.retries >= 3) {
-        console.error(`❌ [Email Queue] Max retries reached for ${item.to}. Dropping from queue.`);
-        queue.shift();
-      } else {
-        // Wait 5s before retrying failed email
-        await new Promise((resolve) => setTimeout(resolve, 5000));
-      }
-    }
-
-    if (queue.length > 0) {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-    }
+export async function sendEmail(to, mailOptions) {
+  if (!to) {
+    console.warn('⚠️ [Email Warning] No recipient email address provided.');
+    return { success: false, error: 'No recipient email' };
   }
 
-  isProcessing = false;
+  const mailTransporter = getTransporter();
+  if (!mailTransporter) {
+    console.warn(`⚠️ [Email Warning] Email server not configured. Skipped sending report to ${to}.`);
+    return { success: false, error: 'Email credentials missing' };
+  }
+
+  try {
+    console.log(`📧 [Email] Sending assessment report to: ${to}...`);
+    const info = await mailTransporter.sendMail(mailOptions);
+    console.log(`✅ [Email] Report successfully sent to ${to}. Message ID: ${info.messageId}`);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error(`❌ [Email Error] Failed to send email to ${to}:`, error?.message || error);
+    return { success: false, error: error?.message || error };
+  }
 }
 
 export function queueEmail(to, mailOptions) {
-  if (!to) {
-    console.warn('⚠️ [Email Queue] Skipped: No recipient email provided.');
-    return;
-  }
-  
-  queue.push({ to, mailOptions, retries: 0 });
-  console.log(`📥 [Email Queue] Queued report email for ${to}. Current queue size: ${queue.length}`);
-  
-  processQueue().catch((err) => console.error('Error in processQueue:', err));
+  sendEmail(to, mailOptions).catch((err) => {
+    console.error(`❌ [Email Queue Error] Async send failed for ${to}:`, err?.message || err);
+  });
 }

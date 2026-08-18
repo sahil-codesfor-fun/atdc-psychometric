@@ -4,21 +4,31 @@ let pool;
 
 function getPool() {
   if (!pool) {
-    if (!process.env.DATABASE_URL) {
-      return {
-        query: async () => [[]],
-        execute: async () => [{ insertId: 0 }],
-      };
+    const connectionUrl = process.env.DATABASE_URL?.trim();
+    if (!connectionUrl) {
+      console.error('❌ [DB ERROR] DATABASE_URL is not defined in environment variables.');
+      throw new Error('DATABASE_URL environment variable is missing.');
     }
-    pool = mysql.createPool({
-      uri: process.env.DATABASE_URL,
+
+    const isRemote = !connectionUrl.includes('localhost') && !connectionUrl.includes('127.0.0.1');
+
+    const poolConfig = {
+      uri: connectionUrl,
       waitForConnections: true,
       connectionLimit: 15,
       queueLimit: 0,
       connectTimeout: 20000,
       enableKeepAlive: true,
       keepAliveInitialDelay: 10000,
-    });
+    };
+
+    if (isRemote || connectionUrl.includes('ssl=')) {
+      poolConfig.ssl = {
+        rejectUnauthorized: false
+      };
+    }
+
+    pool = mysql.createPool(poolConfig);
   }
   return pool;
 }
