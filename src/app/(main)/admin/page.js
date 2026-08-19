@@ -46,7 +46,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DatePicker } from "@/components/ui/date-picker";
 import jsonToCsvExport from "json-to-csv-export";
 
-const ADMIN_EMAIL = "admin@atdc.com";
+const ADMIN_EMAIL = "atdcofficial@gmail.com";
 const ADMIN_PASSWORD = "admin123";
 
 // HGMI Detailed Mapping for Admin Assessment Dossier
@@ -129,7 +129,7 @@ export default function AdminPanel() {
       setError("");
       fetchAllTestSubmissions();
     } else {
-      setError("Invalid administrative credentials. Use admin@atdc.com.");
+      setError("Invalid administrative credentials. Use atdcofficial@gmail.com.");
     }
   };
 
@@ -229,7 +229,7 @@ export default function AdminPanel() {
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@atdc.com"
+                placeholder="atdcofficial@gmail.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="bg-slate-50 border-slate-300 rounded-xl text-sm"
