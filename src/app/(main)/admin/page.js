@@ -285,11 +285,10 @@ export default function AdminPanel() {
 
         <div className="flex items-center gap-3">
           <Button 
-            variant="outline" 
             size="sm" 
             onClick={fetchAllTestSubmissions}
             disabled={loading}
-            className="border-slate-400/40 text-white hover:bg-white/10 rounded-full text-xs font-semibold backdrop-blur-xs"
+            className="bg-white/10 hover:bg-white/20 text-white border border-white/25 rounded-full text-xs font-semibold backdrop-blur-xs transition-all cursor-pointer"
           >
             <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${loading ? "animate-spin" : ""}`} />
             Refresh
